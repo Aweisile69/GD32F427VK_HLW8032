@@ -2,7 +2,7 @@
  * @author: qiwei.wang
  * @Date: 2023-11-27 14:26:03
  * @LastEditors: WangQiWei
- * @LastEditTime: 2023-12-05 10:35:47
+ * @LastEditTime: 2023-12-25 22:23:06
  */
 #include "gd32f4xx.h"
 #include "my_uart.h"
@@ -11,6 +11,12 @@
 #include <stdarg.h>
 
 
+
+/**
+ * @description: 串口初始化函数 
+ * PB6->USART0_TX,PB7->USART0_RX
+ * @return {*}
+ */ 
 void uart_init(void)
 {
     /* 开启GPIOB和串口时钟 */
@@ -27,7 +33,7 @@ void uart_init(void)
     /* 复位USART0 */
     usart_deinit(USART0);
     /* 设置串口波特率*/
-    usart_baudrate_set(USART0, 115200U);
+    usart_baudrate_set(USART0, 9600U);
     /* 设置传输数据的长度*/
     usart_word_length_set(USART0, USART_WL_8BIT);
     /* 设置停止位的长度*/
@@ -40,6 +46,12 @@ void uart_init(void)
     /* 使能串口接收和发送*/
     usart_receive_config(USART0, USART_RECEIVE_ENABLE);
     usart_transmit_config(USART0, USART_TRANSMIT_ENABLE);
+    /* 中断使能*/
+    nvic_irq_enable(USART0_IRQn,0,1);
+    /* 使能USART0读区非空中断 */
+    usart_interrupt_enable(USART0,USART_INT_RBNE);
+    /* 使能USART0空闲中断 */           
+    usart_interrupt_enable(USART0,USART_INT_IDLE);         
     /* 使能串口 */
     usart_enable(USART0);
 }
@@ -52,13 +64,10 @@ void uart_init(void)
  */
 void uart_TransmitByte(uint8_t byte)
 {
-    //发送一个字节，不会出现第二个字节吞掉第一个的情况，所以这里不需要先读SR寄存器
-    //while(usart_flag_get(USART_PERIPHERAL,USART_FLAG_TC) == RESET);
+    //先判断上一次数据是否发送完毕
+    while(usart_flag_get(USART0,USART_FLAG_TC) == RESET);
     //把一个字节数据写入USART_PERIPHERAL的数据寄存器
     usart_data_transmit(USART0,byte);
-    /*等待数据发送完毕，这里需要判断的标志位是USART_FLAG_TC而不是USART_FLAG_TBE
-    看数据手册*/
-    while(usart_flag_get(USART0, USART_FLAG_TC) == RESET);
 }
 
 /**
@@ -69,8 +78,6 @@ void uart_TransmitByte(uint8_t byte)
  */
 void uart_TransmitArray(uint8_t *array,uint16_t length)
 {
-    //进行一次读SR寄存器的操作，和第一次循环写DR寄存器搭配，软件清零TC标志位
-    while(usart_flag_get(USART0,USART_FLAG_TC) == RESET);
     for (uint16_t i = 0; i < length; i++)
     {
         uart_TransmitByte(array[i]);
@@ -84,12 +91,11 @@ void uart_TransmitArray(uint8_t *array,uint16_t length)
  */
 void uart_TransmitString(char *string)
 {
-    while(usart_flag_get(USART0,USART_FLAG_TC) == RESET);
-    /*字符串的最后一个字符为'/0'也就是0，循环的终止条件就是*string*/
     while (*string)
     {
-        usart_data_transmit(USART0, *string);
+        //判断上一次数据是否发送完毕
         while (usart_flag_get(USART0, USART_FLAG_TC) == RESET);
+        usart_data_transmit(USART0, *string);
         string++;
     }
 }
@@ -144,5 +150,18 @@ void uart_printf(char *format, ...)
 	va_end(arg);					//结束变量arg
 	uart_TransmitString(String);		//串口发送字符数组（字符串）
 }
+
+void USART0_IRQHandler(void)
+{
+    if ((RESET != usart_interrupt_flag_get(USART0,USART_INT_FLAG_RBNE)) &&(RESET != usart_flag_get(USART0,USART_FLAG_RBNE)))
+    {
+        uint8_t temp;
+        temp = usart_data_receive(USART0);
+        uart_TransmitByte(temp);
+    } 
+}
+
+
+
 
 

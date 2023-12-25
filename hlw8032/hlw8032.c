@@ -5,8 +5,3 @@ void HLW8032_Init(void)
 {
 
 }
-
-static void uart_init(uint16_t )
-{
-
-}

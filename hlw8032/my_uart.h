@@ -2,12 +2,14 @@
  * @author: qiwei.wang
  * @Date: 2023-11-27 14:26:10
  * @LastEditors: WangQiWei
- * @LastEditTime: 2023-12-05 09:55:30
+ * @LastEditTime: 2023-12-25 22:08:54
  */
 #ifndef __MY_UART_H__
 #define __MY_UART_H__
 
 #include "gd32f4xx.h"
+
+#define MAXLEN 24
 
 void uart_init(void);
 void uart_TransmitByte(uint8_t byte);

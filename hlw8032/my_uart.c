@@ -2,7 +2,7 @@
  * @author: qiwei.wang
  * @Date: 2023-11-27 14:26:03
  * @LastEditors: WangQiWei
- * @LastEditTime: 2023-12-25 22:23:06
+ * @LastEditTime: 2023-12-26 22:24:38
  */
 #include "gd32f4xx.h"
 #include "my_uart.h"
@@ -10,7 +10,11 @@
 #include "string.h"
 #include <stdarg.h>
 
-
+uint8_t u8_RXBuf[D_Rx_Length];      //串口接收数据缓冲区
+uint8_t u8_RxCnt;                   //串口接收数据计数
+uint16_t U16_RxTime;                //串口接收数据时间
+uint8_t B_RxData_En;                //串口正在接收数据标志位
+uint8_t B_RxDataFinish_En;          //串口接收完成数据标志位
 
 /**
  * @description: 串口初始化函数 
@@ -21,19 +25,20 @@ void uart_init(void)
 {
     /* 开启GPIOB和串口时钟 */
     rcu_periph_clock_enable(RCU_GPIOB);
+    rcu_periph_clock_enable(RCU_GPIOA);
     rcu_periph_clock_enable(RCU_USART0);
-    /* PB6和PB7复用为串口 */
-    gpio_af_set(GPIOB, GPIO_AF_7, GPIO_PIN_6);
+    /* PA9和PB7复用为串口 */
     gpio_af_set(GPIOB, GPIO_AF_7, GPIO_PIN_7);
+    gpio_af_set(GPIOB, GPIO_AF_7, GPIO_PIN_6);
     /* 配置GPIO为复用推挽输出*/
-    gpio_mode_set(GPIOB,GPIO_MODE_AF,GPIO_PUPD_PULLUP,GPIO_PIN_6);
     gpio_mode_set(GPIOB,GPIO_MODE_AF,GPIO_PUPD_PULLUP,GPIO_PIN_7);
-    gpio_output_options_set(GPIOB, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_6);
+    gpio_mode_set(GPIOB,GPIO_MODE_AF,GPIO_PUPD_PULLUP,GPIO_PIN_6);
     gpio_output_options_set(GPIOB, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_7);
+    gpio_output_options_set(GPIOB, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_6);
     /* 复位USART0 */
     usart_deinit(USART0);
     /* 设置串口波特率*/
-    usart_baudrate_set(USART0, 9600U);
+    usart_baudrate_set(USART0, 4800U);
     /* 设置传输数据的长度*/
     usart_word_length_set(USART0, USART_WL_8BIT);
     /* 设置停止位的长度*/
@@ -153,11 +158,20 @@ void uart_printf(char *format, ...)
 
 void USART0_IRQHandler(void)
 {
-    if ((RESET != usart_interrupt_flag_get(USART0,USART_INT_FLAG_RBNE)) &&(RESET != usart_flag_get(USART0,USART_FLAG_RBNE)))
+    if (usart_flag_get(USART0,USART_FLAG_RBNE) != RESET)
     {
-        uint8_t temp;
-        temp = usart_data_receive(USART0);
-        uart_TransmitByte(temp);
+        u8_RXBuf[u8_RxCnt] = usart_data_receive(USART0);
+        //开启接收标志
+        B_RxData_En = D_TURE;
+        //计数器累加
+        u8_RxCnt++;
+        //清除接收时间
+        U16_RxTime = 0;
+        if (u8_RxCnt > D_Rx_Length)
+        {
+            u8_RxCnt = 0;
+            B_RxDataFinish_En = D_TURE;
+        }
     } 
 }
 

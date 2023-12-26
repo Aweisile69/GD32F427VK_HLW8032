@@ -2,7 +2,7 @@
  * @author: qiwei.wang
  * @Date: 2023-11-27 14:26:03
  * @LastEditors: WangQiWei
- * @LastEditTime: 2023-12-25 22:23:06
+ * @LastEditTime: 2023-12-26 12:37:52
  */
 #include "gd32f4xx.h"
 #include "my_uart.h"
@@ -14,22 +14,29 @@
 
 /**
  * @description: 串口初始化函数 
- * PB6->USART0_TX,PB7->USART0_RX
+ * PA9->USART0_TX
+ * PB7->USART0_RX
  * @return {*}
  */ 
 void uart_init(void)
 {
     /* 开启GPIOB和串口时钟 */
     rcu_periph_clock_enable(RCU_GPIOB);
+    rcu_periph_clock_enable(RCU_GPIOA);
     rcu_periph_clock_enable(RCU_USART0);
-    /* PB6和PB7复用为串口 */
-    gpio_af_set(GPIOB, GPIO_AF_7, GPIO_PIN_6);
-    gpio_af_set(GPIOB, GPIO_AF_7, GPIO_PIN_7);
-    /* 配置GPIO为复用推挽输出*/
-    gpio_mode_set(GPIOB,GPIO_MODE_AF,GPIO_PUPD_PULLUP,GPIO_PIN_6);
-    gpio_mode_set(GPIOB,GPIO_MODE_AF,GPIO_PUPD_PULLUP,GPIO_PIN_7);
-    gpio_output_options_set(GPIOB, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_6);
-    gpio_output_options_set(GPIOB, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_7);
+    /* 配置DE*/
+    gpio_mode_set(DE_PORT, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, DE_PIN);
+    gpio_output_options_set(DE_PORT, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ, DE_PIN);
+    /* 控制RS485通信的方向*/
+    gpio_bit_set(DE_PORT,DE_PIN);
+    /* 配置PB7,PA9复用为串口*/
+    gpio_af_set(TX_PORT, GPIO_AF_7, TX_PIN);
+    gpio_af_set(RX_PORT, GPIO_AF_7, RX_PORT);
+    /* 配置PB7,PA9为复用推挽输出*/
+    gpio_mode_set(TX_PORT,GPIO_MODE_AF,GPIO_PUPD_PULLUP,TX_PIN);
+    gpio_mode_set(RX_PORT,GPIO_MODE_AF,GPIO_PUPD_PULLUP,RX_PIN);
+    gpio_output_options_set(TX_PORT, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ, TX_PIN);
+    gpio_output_options_set(RX_PORT, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ, RX_PIN);
     /* 复位USART0 */
     usart_deinit(USART0);
     /* 设置串口波特率*/
@@ -55,6 +62,7 @@ void uart_init(void)
     /* 使能串口 */
     usart_enable(USART0);
 }
+
 
 
 /**
@@ -157,7 +165,6 @@ void USART0_IRQHandler(void)
     {
         uint8_t temp;
         temp = usart_data_receive(USART0);
-        uart_TransmitByte(temp);
     } 
 }
 

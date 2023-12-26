@@ -10,14 +10,14 @@
       <TargetName>gd32f4</TargetName>
       <ToolsetNumber>0x4</ToolsetNumber>
       <ToolsetName>ARM-ADS</ToolsetName>
-      <pArmCC>6210000::V6.21::ARMCLANG</pArmCC>
-      <pCCUsed>6210000::V6.21::ARMCLANG</pCCUsed>
-      <uAC6>1</uAC6>
+      <pArmCC>5060960::V5.06 update 7 (build 960)::.\ARMCC</pArmCC>
+      <pCCUsed>5060960::V5.06 update 7 (build 960)::.\ARMCC</pCCUsed>
+      <uAC6>0</uAC6>
       <TargetOption>
         <TargetCommonOption>
           <Device>GD32F427VK</Device>
           <Vendor>GigaDevice</Vendor>
-          <PackID>GigaDevice.GD32F4xx_DFP.3.0.4</PackID>
+          <PackID>GigaDevice.GD32F4xx_DFP.3.0.3</PackID>
           <PackURL>https://gd32mcu.com/data/documents/pack/</PackURL>
           <Cpu>IRAM(0x20000000,0x030000) IRAM2(0x10000000,0x010000) IROM(0x08000000,0x0300000) CPUTYPE("Cortex-M4") FPU2 CLOCK(12000000) ELITTLE</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
@@ -139,7 +139,7 @@
           </Flash1>
           <bUseTDR>1</bUseTDR>
           <Flash2>BIN\UL2CM3.DLL</Flash2>
-          <Flash3>"" ()</Flash3>
+          <Flash3></Flash3>
           <Flash4></Flash4>
           <pFcarmOut></pFcarmOut>
           <pFcarmGrp></pFcarmGrp>
@@ -324,10 +324,10 @@
             <PlainCh>0</PlainCh>
             <Ropi>0</Ropi>
             <Rwpi>0</Rwpi>
-            <wLevel>3</wLevel>
+            <wLevel>2</wLevel>
             <uThumb>0</uThumb>
             <uSurpInc>0</uSurpInc>
-            <uC99>0</uC99>
+            <uC99>1</uC99>
             <uGnu>0</uGnu>
             <useXO>0</useXO>
             <v6Lang>3</v6Lang>
@@ -339,7 +339,7 @@
             <v6Rtti>0</v6Rtti>
             <VariousControls>
               <MiscControls></MiscControls>
-              <Define></Define>
+              <Define>GD32F427</Define>
               <Undefine></Undefine>
               <IncludePath>..\application;..\library\include;..\start;..\hlw8032</IncludePath>
             </VariousControls>
@@ -634,6 +634,26 @@
               <FileName>hlw8032.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\hlw8032\hlw8032.h</FilePath>
+            </File>
+            <File>
+              <FileName>My_485Port.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\hlw8032\My_485Port.c</FilePath>
+            </File>
+            <File>
+              <FileName>My_485Port.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\hlw8032\My_485Port.h</FilePath>
+            </File>
+            <File>
+              <FileName>485Port.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\hlw8032\485Port.c</FilePath>
+            </File>
+            <File>
+              <FileName>485Port.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\hlw8032\485Port.h</FilePath>
             </File>
           </Files>
         </Group>

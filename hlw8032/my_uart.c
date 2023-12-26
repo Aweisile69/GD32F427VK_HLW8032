@@ -2,7 +2,11 @@
  * @author: qiwei.wang
  * @Date: 2023-11-27 14:26:03
  * @LastEditors: WangQiWei
+<<<<<<< HEAD
  * @LastEditTime: 2023-12-26 22:24:38
+=======
+ * @LastEditTime: 2023-12-26 12:37:52
+>>>>>>> 214c2871c14ffd49b72784f6d74685a5011ef8c8
  */
 #include "gd32f4xx.h"
 #include "my_uart.h"
@@ -18,7 +22,8 @@ uint8_t B_RxDataFinish_En;          //串口接收完成数据标志位
 
 /**
  * @description: 串口初始化函数 
- * PB6->USART0_TX,PB7->USART0_RX
+ * PA9->USART0_TX
+ * PB7->USART0_RX
  * @return {*}
  */ 
 void uart_init(void)
@@ -27,6 +32,7 @@ void uart_init(void)
     rcu_periph_clock_enable(RCU_GPIOB);
     rcu_periph_clock_enable(RCU_GPIOA);
     rcu_periph_clock_enable(RCU_USART0);
+<<<<<<< HEAD
     /* PA9和PB7复用为串口 */
     gpio_af_set(GPIOB, GPIO_AF_7, GPIO_PIN_7);
     gpio_af_set(GPIOB, GPIO_AF_7, GPIO_PIN_6);
@@ -35,6 +41,21 @@ void uart_init(void)
     gpio_mode_set(GPIOB,GPIO_MODE_AF,GPIO_PUPD_PULLUP,GPIO_PIN_6);
     gpio_output_options_set(GPIOB, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_7);
     gpio_output_options_set(GPIOB, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_6);
+=======
+    /* 配置DE*/
+    gpio_mode_set(DE_PORT, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, DE_PIN);
+    gpio_output_options_set(DE_PORT, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ, DE_PIN);
+    /* 控制RS485通信的方向*/
+    gpio_bit_set(DE_PORT,DE_PIN);
+    /* 配置PB7,PA9复用为串口*/
+    gpio_af_set(TX_PORT, GPIO_AF_7, TX_PIN);
+    gpio_af_set(RX_PORT, GPIO_AF_7, RX_PORT);
+    /* 配置PB7,PA9为复用推挽输出*/
+    gpio_mode_set(TX_PORT,GPIO_MODE_AF,GPIO_PUPD_PULLUP,TX_PIN);
+    gpio_mode_set(RX_PORT,GPIO_MODE_AF,GPIO_PUPD_PULLUP,RX_PIN);
+    gpio_output_options_set(TX_PORT, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ, TX_PIN);
+    gpio_output_options_set(RX_PORT, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ, RX_PIN);
+>>>>>>> 214c2871c14ffd49b72784f6d74685a5011ef8c8
     /* 复位USART0 */
     usart_deinit(USART0);
     /* 设置串口波特率*/
@@ -60,6 +81,7 @@ void uart_init(void)
     /* 使能串口 */
     usart_enable(USART0);
 }
+
 
 
 /**
@@ -160,6 +182,7 @@ void USART0_IRQHandler(void)
 {
     if (usart_flag_get(USART0,USART_FLAG_RBNE) != RESET)
     {
+<<<<<<< HEAD
         u8_RXBuf[u8_RxCnt] = usart_data_receive(USART0);
         //开启接收标志
         B_RxData_En = D_TURE;
@@ -172,6 +195,10 @@ void USART0_IRQHandler(void)
             u8_RxCnt = 0;
             B_RxDataFinish_En = D_TURE;
         }
+=======
+        uint8_t temp;
+        temp = usart_data_receive(USART0);
+>>>>>>> 214c2871c14ffd49b72784f6d74685a5011ef8c8
     } 
 }
 
